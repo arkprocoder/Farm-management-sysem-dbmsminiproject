@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}
+Add Farming
+{% endblock title %}
+
+{% block body %}
+ <h3 class="text-center bg-success text-white"><span>Add Farming</span> </h3>
+  
+{% with messages=get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+
+<div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
+    {{message}}
+
+
+</div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+<br>
+<div class="container">
+
+<div class="row">
+
+<div class="col-md-4"></div>
+<div class="col-md-4">
+
+<form action="/addfarming" method="post">
+
+
+<div class="form-group">
+<label for="dept">Enter Farming Type</label>
+<input type="text" class="form-control" name="farming" id="farming">
+</div>
+<br>
+
+  <button type="submit" class="btn btn-success btn-sm btn-block">Add Farming</button>
+</form>
+<br>
+<br>
+
+</div>
+
+<div class="col-md-4"></div>
+
+</div></div>
+
+
+
+{% endblock body %}
