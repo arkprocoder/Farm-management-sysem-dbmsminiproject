@@ -76,12 +76,14 @@ def index():
 @app.route('/farmerdetails')
 @login_required
 def farmerdetails():
-    query=db.engine.execute(f"SELECT * FROM `register`") 
+    # query=db.engine.execute(f"SELECT * FROM `register`") 
+    query=Register.query.all()
     return render_template('farmerdetails.html',query=query)
 
 @app.route('/agroproducts')
 def agroproducts():
-    query=db.engine.execute(f"SELECT * FROM `addagroproducts`") 
+    # query=db.engine.execute(f"SELECT * FROM `addagroproducts`") 
+    query=Addagroproducts.query.all()
     return render_template('agroproducts.html',query=query)
 
 @app.route('/addagroproduct',methods=['POST','GET'])
@@ -104,7 +106,8 @@ def addagroproduct():
 @app.route('/triggers')
 @login_required
 def triggers():
-    query=db.engine.execute(f"SELECT * FROM `trig`") 
+    # query=db.engine.execute(f"SELECT * FROM `trig`") 
+    query=Trig.query.all()
     return render_template('triggers.html',query=query)
 
 @app.route('/addfarming',methods=['POST','GET'])
@@ -128,16 +131,18 @@ def addfarming():
 @app.route("/delete/<string:rid>",methods=['POST','GET'])
 @login_required
 def delete(rid):
-    db.engine.execute(f"DELETE FROM `register` WHERE `register`.`rid`={rid}")
-    flash("Slot Deleted Successful","danger")
+    # db.engine.execute(f"DELETE FROM `register` WHERE `register`.`rid`={rid}")
+    post=Register.query.filter_by(rid=rid).first()
+    db.session.delete(post)
+    db.session.commit()
+    flash("Slot Deleted Successful","warning")
     return redirect('/farmerdetails')
 
 
 @app.route("/edit/<string:rid>",methods=['POST','GET'])
 @login_required
 def edit(rid):
-    farming=db.engine.execute("SELECT * FROM `farming`")
-    posts=Register.query.filter_by(rid=rid).first()
+    # farming=db.engine.execute("SELECT * FROM `farming`") 
     if request.method=="POST":
         farmername=request.form.get('farmername')
         adharnumber=request.form.get('adharnumber')
@@ -146,10 +151,21 @@ def edit(rid):
         phonenumber=request.form.get('phonenumber')
         address=request.form.get('address')
         farmingtype=request.form.get('farmingtype')     
-        query=db.engine.execute(f"UPDATE `register` SET `farmername`='{farmername}',`adharnumber`='{adharnumber}',`age`='{age}',`gender`='{gender}',`phonenumber`='{phonenumber}',`address`='{address}',`farming`='{farmingtype}'")
+        # query=db.engine.execute(f"UPDATE `register` SET `farmername`='{farmername}',`adharnumber`='{adharnumber}',`age`='{age}',`gender`='{gender}',`phonenumber`='{phonenumber}',`address`='{address}',`farming`='{farmingtype}'")
+        post=Register.query.filter_by(rid=rid).first()
+        print(post.farmername)
+        post.farmername=farmername
+        post.adharnumber=adharnumber
+        post.age=age
+        post.gender=gender
+        post.phonenumber=phonenumber
+        post.address=address
+        post.farming=farmingtype
+        db.session.commit()
         flash("Slot is Updates","success")
         return redirect('/farmerdetails')
-    
+    posts=Register.query.filter_by(rid=rid).first()
+    farming=Farming.query.all()
     return render_template('edit.html',posts=posts,farming=farming)
 
 
@@ -166,12 +182,12 @@ def signup():
             return render_template('/signup.html')
         encpassword=generate_password_hash(password)
 
-        new_user=db.engine.execute(f"INSERT INTO `user` (`username`,`email`,`password`) VALUES ('{username}','{email}','{encpassword}')")
+        # new_user=db.engine.execute(f"INSERT INTO `user` (`username`,`email`,`password`) VALUES ('{username}','{email}','{encpassword}')")
 
         # this is method 2 to save data in db
-        # newuser=User(username=username,email=email,password=encpassword)
-        # db.session.add(newuser)
-        # db.session.commit()
+        newuser=User(username=username,email=email,password=encpassword)
+        db.session.add(newuser)
+        db.session.commit()
         flash("Signup Succes Please Login","success")
         return render_template('login.html')
 
@@ -191,7 +207,7 @@ def login():
             flash("Login Success","primary")
             return redirect(url_for('index'))
         else:
-            flash("invalid credentials","danger")
+            flash("invalid credentials","warning")
             return render_template('login.html')    
 
     return render_template('login.html')
@@ -217,8 +233,11 @@ def register():
         phonenumber=request.form.get('phonenumber')
         address=request.form.get('address')
         farmingtype=request.form.get('farmingtype')     
-        query=db.engine.execute(f"INSERT INTO `register` (`farmername`,`adharnumber`,`age`,`gender`,`phonenumber`,`address`,`farming`) VALUES ('{farmername}','{adharnumber}','{age}','{gender}','{phonenumber}','{address}','{farmingtype}')")
-        flash("Your Record Has Been Saved","success")
+        query=Register(farmername=farmername,adharnumber=adharnumber,age=age,gender=gender,phonenumber=phonenumber,address=address,farming=farmingtype)
+        db.session.add(query)
+        db.session.commit()
+        # query=db.engine.execute(f"INSERT INTO `register` (`farmername`,`adharnumber`,`age`,`gender`,`phonenumber`,`address`,`farming`) VALUES ('{farmername}','{adharnumber}','{age}','{gender}','{phonenumber}','{address}','{farmingtype}')")
+        # flash("Your Record Has Been Saved","success")
         return redirect('/farmerdetails')
     return render_template('farmer.html',farming=farming)
 
