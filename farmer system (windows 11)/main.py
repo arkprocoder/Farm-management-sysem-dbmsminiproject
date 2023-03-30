@@ -224,7 +224,7 @@ def logout():
 @app.route('/register',methods=['POST','GET'])
 @login_required
 def register():
-    farming=db.engine.execute("SELECT * FROM `farming`")
+    farming=Farming.query.all()
     if request.method=="POST":
         farmername=request.form.get('farmername')
         adharnumber=request.form.get('adharnumber')
